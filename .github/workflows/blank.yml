@@ -1,4 +1,4 @@
-name: CI/CD Monitoring Deployment
+name: Deploy Monitoring & Ingress
 
 on:
   push:
@@ -9,38 +9,24 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Checkout de code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # 2. Installeer kubectl
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+    - name: Make scripts executable
+      run: |
+        chmod +x deploy-monitoring.sh
+        chmod +x deploy-ingress.sh
 
-      # 3. Configure kubeconfig vanuit secret
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_DATA }}" > $HOME/.kube/config
+    - name: Deploy Monitoring Stack
+      run: ./deploy-monitoring.sh
 
-      # 4. Zorg dat scripts uitvoerbaar zijn
-      - name: Make scripts executable
-        run: |
-          chmod +x deploy-monitoring.sh
-          chmod +x deploy-ingress.sh
+    - name: Deploy Ingress
+      run: ./deploy-ingress.sh
 
-      # 5. Deploy Monitoring Stack
-      - name: Deploy Monitoring Stack
-        run: ./deploy-monitoring.sh
+    - name: List monitoring namespace pods
+      run: kubectl get pods -n monitoring
 
-      # 6. Deploy Ingress Controller
-      - name: Deploy Ingress Controller
-        run: ./deploy-ingress.sh
-
-      # 7. Check pods in monitoring namespace
-      - name: Verify pods
-        run: kubectl get pods -n monitoring
+    - name: List ingress namespace pods
+      run: kubectl get pods -n ingress
