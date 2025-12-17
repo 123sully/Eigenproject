@@ -4,31 +4,25 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl kubectl
+    - name: List repo files
+      run: ls -R
 
-      - name: List repo files (for debug)
-        run: ls -R
+    - name: Make deploy scripts executable
+      run: |
+        chmod +x ansible-cluster/deploy-monitoring.sh
+        chmod +x ansible-cluster/deploy-ingress.sh
 
-      - name: Make scripts executable
-        run: |
-          chmod +x ansible-cluster/deploy-monitoring.sh
-          chmod +x ansible-cluster/deploy-ingress.sh
+    - name: Run deploy-monitoring.sh
+      run: ./ansible-cluster/deploy-monitoring.sh
 
-      - name: Deploy Monitoring Stack
-        run: ansible-cluster/deploy-monitoring.sh
-
-      - name: Deploy Ingress Controller
-        run: ansible-cluster/deploy-ingress.sh
+    - name: Run deploy-ingress.sh
+      run: ./ansible-cluster/deploy-ingress.sh
