@@ -1,25 +1,22 @@
-name: Deploy Monitoring
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  deploy-monitoring:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Show repo structure
-      run: ls -R
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
 
-    - name: Make deploy script executable
-      run: chmod +x ./ansible-cluster/deploy-monitoring.sh
-
-    - name: Run deploy monitoring script
-      run: ./ansible-cluster/deploy-monitoring.sh
-
+    - name: Run deploy-monitoring script
+      run: ./deploy-monitoring.sh
