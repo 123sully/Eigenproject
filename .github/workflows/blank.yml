@@ -1,4 +1,4 @@
-name: Deploy Monitoring Stack
+name: CI/CD Monitoring Deployment
 
 on:
   push:
@@ -7,33 +7,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-monitoring:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
+      # 1. Checkout de code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install Ansible
+      # 2. Installeer kubectl
+      - name: Install kubectl
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
 
-      - name: Run deploy-monitoring script
+      # 3. Configure kubeconfig vanuit secret
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_DATA }}" > $HOME/.kube/config
+
+      # 4. Zorg dat scripts uitvoerbaar zijn
+      - name: Make scripts executable
         run: |
           chmod +x deploy-monitoring.sh
-          ./deploy-monitoring.sh
-
-      - name: Run deploy-ingress script
-        run: |
           chmod +x deploy-ingress.sh
-          ./deploy-ingress.sh
 
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f ingress.yaml
+      # 5. Deploy Monitoring Stack
+      - name: Deploy Monitoring Stack
+        run: ./deploy-monitoring.sh
+
+      # 6. Deploy Ingress Controller
+      - name: Deploy Ingress Controller
+        run: ./deploy-ingress.sh
+
+      # 7. Check pods in monitoring namespace
+      - name: Verify pods
+        run: kubectl get pods -n monitoring
