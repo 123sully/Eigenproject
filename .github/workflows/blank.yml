@@ -11,22 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Make scripts executable
-      run: |
-        chmod +x deploy-monitoring.sh
-        chmod +x deploy-ingress.sh
+      - name: Set up environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl kubectl
 
-    - name: Deploy Monitoring Stack
-      run: ./deploy-monitoring.sh
+      - name: List repo files (for debug)
+        run: ls -R
 
-    - name: Deploy Ingress
-      run: ./deploy-ingress.sh
+      - name: Make scripts executable
+        run: |
+          chmod +x ansible-cluster/deploy-monitoring.sh
+          chmod +x ansible-cluster/deploy-ingress.sh
 
-    - name: List monitoring namespace pods
-      run: kubectl get pods -n monitoring
+      - name: Deploy Monitoring Stack
+        run: ansible-cluster/deploy-monitoring.sh
 
-    - name: List ingress namespace pods
-      run: kubectl get pods -n ingress
+      - name: Deploy Ingress Controller
+        run: ansible-cluster/deploy-ingress.sh
