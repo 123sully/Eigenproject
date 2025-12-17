@@ -18,5 +18,8 @@ jobs:
       with:
         version: 'latest'
 
-    - name: Run deploy-monitoring script
-      run: ./deploy-monitoring.sh
+    - name: List repo files
+      run: ls -R
+
+    - name: Deploy monitoring (skipped)
+      run: echo "deploy-monitoring.sh script is skipped for now"
