@@ -1,28 +1,25 @@
-name: Deploy Monitoring & Ingress
+name: Deploy Monitoring
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-monitoring:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: List repo files
+    - name: Show repo structure
       run: ls -R
 
-    - name: Make deploy scripts executable
-      run: |
-        chmod +x ansible-cluster/deploy-monitoring.sh
-        chmod +x ansible-cluster/deploy-ingress.sh
+    - name: Make deploy script executable
+      run: chmod +x ./ansible-cluster/deploy-monitoring.sh
 
-    - name: Run deploy-monitoring.sh
+    - name: Run deploy monitoring script
       run: ./ansible-cluster/deploy-monitoring.sh
 
-    - name: Run deploy-ingress.sh
-      run: ./ansible-cluster/deploy-ingress.sh
