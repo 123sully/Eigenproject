@@ -1,0 +1,39 @@
+name: Deploy Monitoring Stack
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-monitoring:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Run deploy-monitoring script
+        run: |
+          chmod +x deploy-monitoring.sh
+          ./deploy-monitoring.sh
+
+      - name: Run deploy-ingress script
+        run: |
+          chmod +x deploy-ingress.sh
+          ./deploy-ingress.sh
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f ingress.yaml
