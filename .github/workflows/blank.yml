@@ -18,8 +18,12 @@ jobs:
       with:
         version: 'latest'
 
-    - name: List repo files
-      run: ls -R
+    - name: Configure kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
-    - name: Deploy monitoring (skipped)
-      run: echo "deploy-monitoring.sh script is skipped for now"
+    - name: Deploy monitoring
+      run: |
+        chmod +x ./deploy-monitoring.sh
+        ./deploy-monitoring.sh
